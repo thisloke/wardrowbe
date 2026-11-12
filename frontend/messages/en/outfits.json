@@ -191,5 +191,9 @@
   },
   "viewCalendar": "Calendar",
   "viewList": "List",
-  "viewToggle": "View toggle"
+  "viewToggle": "View toggle",
+  "weatherExtras": {
+    "ifCooler": "If it gets cooler: add {item}",
+    "ifWarmer": "If it warms up: take off {item}"
+  }
 }

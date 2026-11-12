@@ -191,5 +191,9 @@
   },
   "viewCalendar": "Kalender",
   "viewList": "Liste",
-  "viewToggle": "Ansicht wechseln"
+  "viewToggle": "Ansicht wechseln",
+  "weatherExtras": {
+    "ifCooler": "Wenn es kühler wird: {item} dazunehmen",
+    "ifWarmer": "Wenn es wärmer wird: {item} ausziehen"
+  }
 }
