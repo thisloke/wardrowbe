@@ -110,14 +110,30 @@ class TestFootwearScoring:
         hot_feel = _factor(heavy, _feels(18, 23))
         assert hot_feel < cool_air
 
-    def test_temp_range_uses_its_midpoint(self):
+    def test_range_high_makes_it_warm_even_when_the_midpoint_is_not(self):
         heavy = _shoe(ai_description="High-top sneakers")
-        swing = _weather(temp=20, window_min=8, window_max=18)
-        assert _footwear_weight_score(heavy, swing, None, True) == _footwear_weight_score(
-            heavy, _weather(temp=13), None, True
-        )
-        hot_swing = _weather(temp=20, window_min=18, window_max=30)
-        assert _footwear_weight_score(heavy, hot_swing, None, True) < 1.0
+        # Midpoint 19, below the warm point, but the afternoon reaches 28.
+        swing = _weather(temp=15, window_min=10, window_max=28)
+        assert swing.feels_like < 20
+        assert _footwear_weight_score(heavy, swing, None, True) < 1.0
+        cool_swing = _weather(temp=15, window_min=8, window_max=18)
+        assert _footwear_weight_score(heavy, cool_swing, None, True) == 1.0
+
+    def test_range_low_makes_it_cold_even_when_the_midpoint_is_not(self):
+        light = _shoe(material="knit")
+        # Midpoint 10.5 is not cold, but the morning drops to 2.
+        swing = _weather(temp=11, window_min=2, window_max=19)
+        assert _footwear_weight_score(light, swing, None, True) == LIGHT_FOOTWEAR_COLD_FACTOR
+
+    def test_feels_like_counts_alongside_a_range(self):
+        heavy = _shoe(ai_description="High-top sneakers")
+        light = _shoe(material="knit")
+        hot_feel = _weather(temp=15, window_min=12, window_max=20)
+        hot_feel.feels_like = 26
+        assert _footwear_weight_score(heavy, hot_feel, None, True) < 1.0
+        cold_feel = _weather(temp=12, window_min=8, window_max=18)
+        cold_feel.feels_like = 3
+        assert _footwear_weight_score(light, cold_feel, None, True) == LIGHT_FOOTWEAR_COLD_FACTOR
 
     def test_threshold_follows_user_preference(self):
         heavy = _shoe(ai_description="High-top sneakers")
@@ -166,6 +182,47 @@ class TestFootwearScoring:
         )
         order = [s.item.id for s in result]
         assert order.index(light.id) < order.index(heavy.id)
+
+    def test_small_wardrobe_reorders_only_the_shoes(self):
+        shirt, jeans, hat = _item(type="shirt"), _item(type="jeans"), _item(type="hat")
+        heavy = _shoe(ai_description="Chunky leather sneakers")
+        light = _shoe(material="knit")
+        items = [heavy, shirt, light, jeans, hat]
+        result = score_items(
+            items=items,
+            weather=_feels(22.6, 24),
+            occasion="casual",
+            preferences=None,
+            user_today=date(2026, 3, 8),
+            current_season="spring",
+            learned_prefs=None,
+            good_pairs={},
+            recently_worn_dates={},
+        )
+        assert [s.item.id for s in result] == [i.id for i in (light, shirt, heavy, jeans, hat)]
+
+    def test_small_wardrobe_keeps_order_on_a_mild_day_and_mandatory_stays_first(self):
+        heavy = _shoe(ai_description="Chunky leather sneakers")
+        light = _shoe(material="knit")
+        shirt = _item(type="shirt")
+        kwargs = {
+            "occasion": "casual",
+            "preferences": None,
+            "user_today": date(2026, 3, 8),
+            "current_season": "spring",
+            "learned_prefs": None,
+            "good_pairs": {},
+            "recently_worn_dates": {},
+        }
+        mild = score_items(items=[heavy, shirt, light], weather=_weather(temp=15), **kwargs)
+        assert [s.item.id for s in mild] == [heavy.id, shirt.id, light.id]
+        warm = score_items(
+            items=[heavy, shirt, light],
+            weather=_feels(22.6, 24),
+            mandatory_item_ids={heavy.id},
+            **kwargs,
+        )
+        assert warm[0].item.id == heavy.id
 
 
 class TestFootwearPrompt:
