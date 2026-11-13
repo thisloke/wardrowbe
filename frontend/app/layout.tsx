@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import './globals.css';
 import { Providers } from './providers';
+import { ServiceWorkerRegister } from '@/components/service-worker-register';
 import { LOCALE_METADATA, type SupportedLocale } from '@/lib/i18n/locales';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,11 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  appleWebApp: {
+    capable: true,
+    title: 'Wardrowbe',
+    statusBarStyle: 'default',
+  },
 };
 
 export const viewport: Viewport = {
@@ -32,6 +38,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
 };
 
 export default async function RootLayout({
@@ -47,6 +58,7 @@ export default async function RootLayout({
       <body className={`${inter.variable} font-sans`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>{children}</Providers>
+          <ServiceWorkerRegister />
         </NextIntlClientProvider>
       </body>
     </html>

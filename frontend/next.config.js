@@ -18,6 +18,17 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+    ];
+  },
   // /api/v1/* is proxied by app/api/v1/[...path]/route.ts rather than a rewrite here, because
   // rewrites() is serialized into routes-manifest.json at build time and so cannot honor a
   // runtime BACKEND_URL in the prebuilt image.

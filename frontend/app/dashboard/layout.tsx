@@ -62,7 +62,7 @@ export default function DashboardLayout({
         <MobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="lg:pl-72">
           <Header onMenuClick={() => setSidebarOpen(true)} />
-          <main className="py-6 px-4 sm:px-6 lg:px-8 pb-20 lg:pb-6 overflow-x-hidden">
+          <main className="py-6 px-4 sm:px-6 lg:px-8 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-6 overflow-x-hidden">
             <AiRouteGuard>{children}</AiRouteGuard>
           </main>
         </div>

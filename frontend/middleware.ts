@@ -92,7 +92,7 @@ export async function middleware(request: NextRequest) {
 // logged-out page clears it once more.
 export const config = {
   matcher: [
-    '/((?!api/|login|auth/logout|_next|.*\\..*).*)',
+    '/((?!api/|login|auth/logout|_next|manifest\\.webmanifest|sw\\.js|offline\\.html|.*\\..*).*)',
     '/api/auth/:path*',
     { source: '/login', has: [{ type: 'query', key: 'loggedOut', value: '1' }] },
   ],
